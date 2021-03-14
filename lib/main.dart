@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:little_chat/Service/auth.dart';
+import 'package:little_chat/models/userInfo.dart';
 import 'package:little_chat/screens/login_screen.dart';
 import 'package:little_chat/screens/login_screen_statefull.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:little_chat/screens/wrapper.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
 
 class MyApp extends StatelessWidget{
@@ -17,13 +26,16 @@ class MyApp extends StatelessWidget{
           FocusManager.instance.primaryFocus.unfocus();
         }
       },
-      child: MaterialApp(
-        title: "Little Chat",
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: Colors.red[800],
+      child: StreamProvider<userInfo>.value(
+        value: AuthService().authState,
+        child: MaterialApp(
+          title: "Little Chat",
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primaryColor: Colors.red[800],
+          ),
+          home: Wrapper(),
         ),
-        home: LoginScreenStateful(),
       ),
     );
   }

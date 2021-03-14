@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:little_chat/Service/auth.dart';
 
 class LoginScreenStateful extends StatefulWidget{
   @override
@@ -9,6 +10,9 @@ class LoginScreenStateful extends StatefulWidget{
 class _LoginScreen extends State<LoginScreenStateful> {
   bool _isHidden = true;
   bool _remember = false;
+  TextEditingController userNameController = new TextEditingController();
+  TextEditingController passWordController = new TextEditingController();
+  final AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,6 +43,7 @@ class _LoginScreen extends State<LoginScreenStateful> {
               Container(
                 margin: EdgeInsets.all(12),
                 child: TextField(
+                  controller: userNameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -57,6 +62,7 @@ class _LoginScreen extends State<LoginScreenStateful> {
               Container(
                 margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: TextField(
+                  controller: passWordController,
                   obscureText: _isHidden,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -99,7 +105,11 @@ class _LoginScreen extends State<LoginScreenStateful> {
                 ),
               ),
               Container(
-                child: RaisedButton(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    dynamic loginResult = await _auth.signInUsernamePassword(userNameController.text, passWordController.text);
+                    //print(AuthService().user); old subscription based code callers
+                  },
                   child: Text(
                     "Login",
                     style: TextStyle(
