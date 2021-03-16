@@ -1,6 +1,7 @@
 
 import 'dart:core';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:little_chat/models/message_model.dart';
 import 'home.dart';
@@ -35,7 +36,7 @@ class _chatScreenState extends State<chatScreen> {
                 padding: EdgeInsets.only(top: 15.0),
                 itemCount: chats.length,
                   itemBuilder: (BuildContext context, int index) {
-                  bool isMe = chats[index].sender == "Collin";
+                  bool isMe = chats[index].senderid == widget.user;
                   final Message message = chats[index];
                   return _buildMessage(message, isMe);
               }),

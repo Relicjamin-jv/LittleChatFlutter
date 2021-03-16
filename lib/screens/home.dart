@@ -6,6 +6,11 @@ import 'package:little_chat/screens/ChatScreen.dart';
 import 'package:little_chat/screens/shed.dart';
 
 class home extends StatefulWidget {
+
+  final String user;
+
+  home({this.user});
+
   @override
   _homeState createState() => _homeState();
 }
@@ -103,12 +108,12 @@ class _homeState extends State<home> {
                 itemCount: chats.length,
                   itemBuilder: (BuildContext context, int index){
                   return ListTile(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => chatScreen(user: chats[index].sender))),
-                    title: Text(chats[index].sender),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => chatScreen(user: widget.user))),
+                    title: Text(chats[index].senderid),
                     leading: CircleAvatar(
                       backgroundColor: Colors.red,
                       child: Text(
-                        '${chats[index].sender[0]}'
+                        '${chats[index].senderid[0]}'
                       ),
                     ),
                     subtitle: Text(

@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:little_chat/Service/auth.dart';
+import 'package:little_chat/Service/database.dart';
 import 'package:little_chat/Shared/loading.dart';
 
 class LoginScreenStateful extends StatefulWidget{
@@ -131,6 +133,8 @@ class _LoginScreen extends State<LoginScreenStateful> {
                         _error = "Wrong Username/Password";
                       });
                       print("Wrong user/password");
+                    }else{
+                      print("Right password");
                     }
                     //print(AuthService().user); old subscription based code callers
                   },
