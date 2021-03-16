@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:little_chat/Service/auth.dart';
+import 'package:little_chat/Shared/loading.dart';
 
 class LoginScreenStateful extends StatefulWidget{
   @override
@@ -10,12 +12,14 @@ class LoginScreenStateful extends StatefulWidget{
 class _LoginScreen extends State<LoginScreenStateful> {
   bool _isHidden = true;
   bool _remember = false;
+  bool _loading = false;
+  String _error = "";
   TextEditingController userNameController = new TextEditingController();
   TextEditingController passWordController = new TextEditingController();
   final AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return _loading ? Loading() : Scaffold(
       body: Center(
         child: Container(
           decoration: BoxDecoration(
@@ -43,6 +47,11 @@ class _LoginScreen extends State<LoginScreenStateful> {
               Container(
                 margin: EdgeInsets.all(12),
                 child: TextField(
+                  onTap: () {
+                    setState(() {
+                      _error = "";
+                    });
+                  },
                   controller: userNameController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -62,6 +71,11 @@ class _LoginScreen extends State<LoginScreenStateful> {
               Container(
                 margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: TextField(
+                  onTap: (){
+                    setState(() {
+                      _error = "";
+                    });
+                  },
                   controller: passWordController,
                   obscureText: _isHidden,
                   decoration: InputDecoration(
@@ -107,7 +121,17 @@ class _LoginScreen extends State<LoginScreenStateful> {
               Container(
                 child: ElevatedButton(
                   onPressed: () async {
+                    setState(() {
+                      _loading = true;
+                    });
                     dynamic loginResult = await _auth.signInUsernamePassword(userNameController.text, passWordController.text);
+                    if(loginResult == null){
+                      setState(() {
+                        _loading = false;
+                        _error = "Wrong Username/Password";
+                      });
+                      print("Wrong user/password");
+                    }
                     //print(AuthService().user); old subscription based code callers
                   },
                   child: Text(
@@ -115,6 +139,19 @@ class _LoginScreen extends State<LoginScreenStateful> {
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: _error != "",
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Text(
+                    _error,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 15.0,
                     ),
                   ),
                 ),

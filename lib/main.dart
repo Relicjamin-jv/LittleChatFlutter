@@ -7,10 +7,14 @@ import 'package:little_chat/screens/login_screen_statefull.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:little_chat/screens/wrapper.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight
+  ]);
   runApp(MyApp());
 }
 
