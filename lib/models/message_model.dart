@@ -16,8 +16,3 @@ class Message{
 
 }
 
-//Some sample messages to set up just to get the UX set up
-
-List<Message> chats = [
-
-];

@@ -1,12 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:little_chat/Service/auth.dart';
+import 'package:little_chat/Service/database.dart';
+import 'package:little_chat/Shared/loading.dart';
 import 'package:little_chat/models/message_model.dart';
+import 'package:little_chat/models/userInfo.dart';
+import 'package:little_chat/models/userdatamodel.dart';
 import 'package:little_chat/screens/ChatScreen.dart';
 import 'package:little_chat/screens/shed.dart';
+import 'package:little_chat/screens/user_selection.dart';
+import 'package:provider/provider.dart';
 
 class home extends StatefulWidget {
-
   final String user;
 
   home({this.user});
@@ -18,6 +24,7 @@ class home extends StatefulWidget {
 class _homeState extends State<home> {
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<userInfo>(context);
     return Scaffold(
       drawer: Drawer(
         child: ListView(
@@ -36,38 +43,24 @@ class _homeState extends State<home> {
               leading: Icon(
                 Icons.calendar_today_sharp,
               ),
-              title: Text(
-                "Schedule"
-              ),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => shed())),
+              title: Text("Schedule"),
+              onTap: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => shed())),
             ),
             ListTile(
-              leading: Icon(
-                Icons.add
-              ),
-              title: Text(
-                "Start a Conversation"
-              ),
-              //TODO make a recycle screen that allows the user to pick the people who they want to talk to
-              onTap: () => null,
+              leading: Icon(Icons.add),
+              title: Text("Start a Conversation"),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => user_selection())),
             ),
             ListTile(
-              leading: Icon(
-                Icons.info_outline_rounded
-              ),
-              title: Text(
-                "Information"
-              ),
+              leading: Icon(Icons.info_outline_rounded),
+              title: Text("Information"),
               //TODO make a screen that has a short info on the app and contact information
               onTap: () => null,
             ),
             ListTile(
-              leading: Icon(
-                Icons.exit_to_app_sharp
-              ),
-              title: Text(
-                "Sign out"
-              ),
+              leading: Icon(Icons.exit_to_app_sharp),
+              title: Text("Sign out"),
               onTap: () => AuthService().signOut(),
             ),
           ],
@@ -89,65 +82,80 @@ class _homeState extends State<home> {
         elevation: 0.0,
         actions: <Widget>[
           IconButton(
-              onPressed: (){
-                //TODO add a search function for the user to search for an user
-              },
-              icon: Icon(
-                Icons.search,
-                color: Colors.white,
-              ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          //TODO add the listview based on this video https://www.youtube.com/watch?v=h-igXZCCrrc
-          Expanded(
-            child: Container(
-              child: ListView.builder(
-                itemCount: chats.length,
-                  itemBuilder: (BuildContext context, int index){
-                  return ListTile(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => chatScreen(user: widget.user))),
-                    title: Text(chats[index].senderid),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.red,
-                      child: Text(
-                        '${chats[index].senderid[0]}'
-                      ),
-                    ),
-                    subtitle: Text(
-                      chats[index].text
-                    ),
-                    trailing: Container(
-                      child: Column(
-                        children: [
-                          Text(
-                            chats[index].time
-                          ),
-                          Container(
-                            padding: EdgeInsets.fromLTRB(15.0, 15.0, 0, 0),
-                            child: Visibility(
-                              visible: chats[index].unread,
-                              child: Icon(
-                                Icons.check,
-                                size: 15.0,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-              }),
+            onPressed: () {
+              //TODO add a search function for the user to search for an user
+            },
+            icon: Icon(
+              Icons.search,
+              color: Colors.white,
             ),
           ),
         ],
       ),
+      body: StreamBuilder<DocumentSnapshot>(
+          stream: DataBaseService(uid: user.uid).userData,
+          builder: (context, snapshot) {
+            DocumentSnapshot user = snapshot.data;
+            if (snapshot.hasData) {
+              print(user.data()['groups']);
+              return Column(
+                children: [
+                  //TODO add the listview based on this video https://www.youtube.com/watch?v=h-igXZCCrrc
+                  Expanded(
+                    child: Container(
+                      child: ListView.builder(
+                          itemCount: user.data()['groups'].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                              onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          chatScreen(user: "Place holder"))),
+                              title: Text(user.data()['groups'][index]),
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.red,
+                                child:
+                                    Text(
+                                      '${user.data()['groups'][index][0]}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                              ),
+                              subtitle: Text(
+                                  "Placement holder until logic is set in place"),
+                              trailing: Container(
+                                child: Column(
+                                  children: [
+                                    Text("PH"),
+                                    Container(
+                                      padding:
+                                          EdgeInsets.fromLTRB(15.0, 15.0, 0, 0),
+                                      child: Visibility(
+                                        visible: true,
+                                        child: Icon(
+                                          Icons.check,
+                                          size: 15.0,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                    ),
+                  ),
+                ],
+              );
+            } else if (snapshot.hasError) {
+              print("there was an error");
+              return Loading();
+            } else {
+              return Loading();
+            }
+          }),
     );
   }
 }
-
-
-
-

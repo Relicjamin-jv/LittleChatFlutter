@@ -43,7 +43,7 @@ class AuthService{
           password: passWord
       );
       List<String> displayName = _toDisplayName(userName);
-      await DataBaseService(uid: userCredential.user.uid).updateUserData(displayName[0] + " " + displayName[1], []);
+      await DataBaseService(uid: userCredential.user.uid).updateUserData(displayName[0] + " " + displayName[1], ["Everybody"]);
       return _userFromFirebaseCredential(userCredential);
     } on FirebaseAuthException catch (e){
       print(e.code);

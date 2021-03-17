@@ -31,15 +31,15 @@ class _chatScreenState extends State<chatScreen> {
         children: [
           Expanded(
             child: Container(
-              child: ListView.builder(
-                reverse: true,
-                padding: EdgeInsets.only(top: 15.0),
-                itemCount: chats.length,
-                  itemBuilder: (BuildContext context, int index) {
-                  bool isMe = chats[index].senderid == widget.user;
-                  final Message message = chats[index];
-                  return _buildMessage(message, isMe);
-              }),
+              // child: ListView.builder(
+              //   reverse: true,
+              //   padding: EdgeInsets.only(top: 15.0),
+              //   itemCount: chats.length,
+              //     itemBuilder: (BuildContext context, int index) {
+              //     bool isMe = chats[index].senderid == widget.user;
+              //     final Message message = chats[index];
+              //     return _buildMessage(message, isMe);
+              // }),
             ),
           ),
           _buildMessageComposer(),
