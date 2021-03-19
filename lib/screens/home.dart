@@ -22,6 +22,8 @@ class home extends StatefulWidget {
 }
 
 class _homeState extends State<home> {
+  List<String> displayName = [];
+  String displayToChat = '';
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<userInfo>(context);
@@ -97,7 +99,6 @@ class _homeState extends State<home> {
           builder: (context, snapshot) {
             DocumentSnapshot user = snapshot.data;
             if (snapshot.hasData) {
-              print(user.data()['groups']);
               return Column(
                 children: [
                   //TODO add the listview based on this video https://www.youtube.com/watch?v=h-igXZCCrrc
@@ -107,42 +108,67 @@ class _homeState extends State<home> {
                           itemCount: user.data()['groups'].length,
                           itemBuilder: (BuildContext context, int index) {
                             return ListTile(
-                              onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) =>
-                                          chatScreen(user: "Place holder"))),
-                              title: Text(user.data()['groups'][index]),
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.red,
-                                child:
-                                    Text(
-                                      '${user.data()['groups'][index][0]}',
-                                      style: TextStyle(
-                                        color: Colors.white,
+                              onTap: () => {
+                                print(displayName),
+                                displayToChat = displayName[index],
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) =>
+                                            chatScreen(user: displayToChat)))
+                                },
+                              title: FutureBuilder(
+                                future: _title(user.data()['groups'][index]),
+                                builder: (context, snap){
+                                  if(snap.hasData){
+                                    bool group = true;
+                                    if(snap.data['type'] == 1){
+                                      group = false;
+                                    }else{
+                                      group = true;
+                                    }
+                                    String finalDisplayName = group ? snap.data['displayName'].toString().replaceAll('[', "").replaceAll(']', "").replaceAll(user.data()['displayName'], "").replaceAll(",", "")
+                                        : snap.data['displayName'].toString().replaceAll('[', "").replaceAll(']', "").replaceAll(user.data()['displayName'], "You");
+                                     if(finalDisplayName[0] == " " || finalDisplayName[0] == ","){
+                                       finalDisplayName = finalDisplayName.substring(1);
+                                     }
+                                    if(!displayName.contains(finalDisplayName)) {
+                                      displayName.add(finalDisplayName);
+                                    }
+                                    return Text(finalDisplayName);
+                                  }else if(snap.hasError){
+                                    return Text("There was an error");
+                                  }else{
+                                    return Loading();
+                                  }
+                                },
+                              ),
+                              leading: FutureBuilder(
+                                future: _title(user.data()['groups'][index]),
+                                builder: (context, snap){
+                                  if(snap.hasData){
+                                    String finalCircleName = snap.data['displayName'].toString().replaceAll('[', "").replaceAll(']', "").replaceAll(user.data()['displayName'], "").replaceAll(",", "");
+                                    if(finalCircleName[0] == " "){
+                                      finalCircleName = finalCircleName.substring(1);
+                                    }
+                                    return CircleAvatar(
+                                        backgroundColor: Colors.red,
+                                      child: Text(
+                                          finalCircleName[0],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
                                       ),
-                                    ),
+                                    );
+                                  }else if(snap.hasError){
+                                    return Text("There was an error");
+                                  }else{
+                                    return Loading();
+                                  }
+                                },
                               ),
                               subtitle: Text(
                                   "Placement holder until logic is set in place"),
-                              trailing: Container(
-                                child: Column(
-                                  children: [
-                                    Text("PH"),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(15.0, 15.0, 0, 0),
-                                      child: Visibility(
-                                        visible: true,
-                                        child: Icon(
-                                          Icons.check,
-                                          size: 15.0,
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
                             );
                           }),
                     ),
@@ -157,5 +183,15 @@ class _homeState extends State<home> {
             }
           }),
     );
+  }
+
+  Future _title(String data) async {
+    dynamic result = await DataBaseService().getDisplayGroup(data);
+
+    if(result == null){
+      return "No";
+    }else{
+      return result;
+    }
   }
 }

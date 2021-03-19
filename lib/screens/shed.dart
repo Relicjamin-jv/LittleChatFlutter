@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:little_chat/models/shed_model.dart';
+import 'package:little_chat/screens/uploadScreen.dart';
 import 'package:photo_view/photo_view.dart';
+import 'dart:io';
 
+
+
+//TODO https://pub.dev/packages/image_picker need to add the configuration for the image picker plugin for ios, or will they be doomed forever
 class shed extends StatefulWidget {
   @override
   _shedState createState() => _shedState();
@@ -27,7 +33,7 @@ class _shedState extends State<shed> {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              //TODO add function for the user to use upload a network image
+              Navigator.push(context, MaterialPageRoute(builder: (_) => uploadScreen()));
             },
             icon: Icon(
               Icons.add,
@@ -53,7 +59,7 @@ class _shedState extends State<shed> {
                       child: Hero(
                         tag: "pop",
                         child: Image(
-                          image: AssetImage(images[index].urlImage),
+                          image: NetworkImage("https://firebasestorage.googleapis.com/v0/b/littlechat-76a32.appspot.com/o/scheduleImages%2F2021-03-19%2016%3A20%3A06.810280.png?alt=media&token=988a28b0-6b26-4f55-9531-abf05da1b4fc"),
                         ),
                       ),
                     ),

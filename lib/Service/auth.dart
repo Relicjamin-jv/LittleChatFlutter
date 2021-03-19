@@ -7,16 +7,19 @@ import 'package:little_chat/screens/home.dart';
 
 import 'database.dart';
 
-class AuthService{
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;/*creates a firebase instance, allows to interact with Firebase Auth*/
+  /*creates a firebase instance, allows to interact with Firebase Auth*/
 
   /*creates a User type of the Firebase user*/
-  userInfo _userFromFirebaseCredential(UserCredential userCredential){
-    return userCredential != null ? userInfo(uid: userCredential.user.uid) : null;
+  userInfo _userFromFirebaseCredential(UserCredential userCredential) {
+    return userCredential != null
+        ? userInfo(uid: userCredential.user.uid)
+        : null;
   }
 
-  userInfo _userFromFirebase(User user){
+  userInfo _userFromFirebase(User user) {
     return user != null ? userInfo(uid: user.uid) : null;
   }
 
@@ -31,21 +34,22 @@ class AuthService{
   //   });
   // }
 
-  Stream<userInfo> get authState => _auth.authStateChanges().map((User authState) => _userFromFirebase(authState)); //the state of the user being logged in or not
+  Stream<userInfo> get authState =>
+      _auth.authStateChanges().map((User authState) => _userFromFirebase(
+          authState)); //the state of the user being logged in or not
 
   //signing in with email and password
   Future signInUsernamePassword(String userName, String passWord) async {
     String displayName = "";
     try {
       UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-          email: userName,
-          password: passWord
-      );
+          .signInWithEmailAndPassword(email: userName, password: passWord);
       List<String> displayName = _toDisplayName(userName);
-      await DataBaseService(uid: userCredential.user.uid).updateUserData(displayName[0] + " " + displayName[1], ["Everybody"]);
+      await DataBaseService(uid: userCredential.user.uid).updateUserData(
+          capitalize(displayName[0]) + " " + capitalize(displayName[1]),
+          ["Everybody"]);
       return _userFromFirebaseCredential(userCredential);
-    } on FirebaseAuthException catch (e){
+    } on FirebaseAuthException catch (e) {
       print(e.code);
       return null;
     }
@@ -62,4 +66,11 @@ class AuthService{
     return string[0].split(".");
   }
 
+  String capitalize(String string) {
+    if (string.isEmpty) {
+      return string;
+    }
+
+    return string[0].toUpperCase() + string.substring(1);
+  }
 }
