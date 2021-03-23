@@ -21,6 +21,7 @@ class _uploaderState extends State<uploader> {
   double progressState = 0.0;
   String finalPath = '';
   String downloadUrl = '';
+  DateTime uploadTime;
 
 
 
@@ -82,7 +83,8 @@ class _uploaderState extends State<uploader> {
   // }
 
   void _startUpload(){
-    String filepath = 'scheduleImages/${DateTime.now()}.png';
+    uploadTime = DateTime.now();
+    String filepath = 'scheduleImages/$uploadTime.png';
     finalPath = filepath; //takes the value and if successful up at the top it will add it to firestore for metadata for it to be called later on to then call a network image
     setState(() {
       task = storage.ref().child(filepath).putFile(widget.file);
@@ -101,7 +103,7 @@ class _uploaderState extends State<uploader> {
         } else
           {
             DataBaseService().updateScheduleData(
-                downloadUrl.substring(8), downloadUrl.substring(75))
+                downloadUrl.substring(8), downloadUrl.substring(75), uploadTime)
           }
       });
     }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:little_chat/Service/database.dart';
+import 'package:little_chat/Shared/loading.dart';
 import 'package:little_chat/models/shed_model.dart';
 import 'package:little_chat/screens/uploadScreen.dart';
 import 'package:photo_view/photo_view.dart';
@@ -14,6 +16,26 @@ class shed extends StatefulWidget {
 }
 
 class _shedState extends State<shed> {
+  List shedUrls = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchURL();
+  }
+
+  fetchURL() async{
+    dynamic result = await DataBaseService().getScheduleURL();
+    if(result == null){
+      print("Failed to fetchURL");
+    }else{
+      setState(() {
+        shedUrls = result;
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,9 +68,9 @@ class _shedState extends State<shed> {
         children: [
           Expanded(
             child: ListView.builder(
-                itemCount: images.length,
+                itemCount: shedUrls.length <= 3 ? shedUrls.length : 3,
                 itemBuilder: (BuildContext context, int index) {
-                  String imageUrl = images[index].urlImage;
+                  String imageUrl = shedUrls[index]['photoUrl'];
                   return ListTile(
                     title: GestureDetector(
                       onTap: () {
@@ -58,8 +80,14 @@ class _shedState extends State<shed> {
                       },
                       child: Hero(
                         tag: "pop",
-                        child: Image(
-                          image: NetworkImage("https://firebasestorage.googleapis.com/v0/b/littlechat-76a32.appspot.com/o/scheduleImages%2F2021-03-19%2016%3A20%3A06.810280.png?alt=media&token=988a28b0-6b26-4f55-9531-abf05da1b4fc"),
+                        child: Container(
+                          child: Image.network(
+                            "https://" + imageUrl,
+                            height: 300,
+                            loadingBuilder:(context, child, progress){
+                              return progress == null ? child : LinearProgressIndicator(value: (progress.cumulativeBytesLoaded/progress.expectedTotalBytes));
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -84,7 +112,7 @@ class _shedState extends State<shed> {
                 tag: "pop",
                 child: Container(
                   child: PhotoView(
-                    imageProvider: AssetImage(image)
+                    imageProvider: NetworkImage("https://" + image)
                   ),
                 ),
               ),

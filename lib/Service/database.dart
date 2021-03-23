@@ -40,9 +40,10 @@ class DataBaseService {
     }
   }
 
-  Future updateScheduleData(String photoUrl, String doc) async {
+  Future updateScheduleData(String photoUrl, String doc, DateTime time) async {
     return await scheduleCollection.doc(doc).set({
       'photoUrl': photoUrl,
+      'date' : time
     }).then((value) => print("shed info added to the documents")).catchError((onError) => print("failed shed upload"));
   }
 
@@ -89,6 +90,22 @@ class DataBaseService {
       'read': [" "],
       'groupID': groupID,
     });
+  }
+
+  Future getScheduleURL() async{
+    List items = [];
+    try {
+      await scheduleCollection.orderBy('date', descending: true).get().then((QuerySnapshot querySnapshot) =>
+      {
+        querySnapshot.docs.forEach((element) {
+          items.add(element.data());
+        })
+      });
+      return items;
+    }catch(e){
+      print(e.toString());
+      return null;
+    }
   }
   
   Future getDisplayNames() async {
@@ -151,6 +168,7 @@ class DataBaseService {
         return Future<bool>.value(true);
       }
     });
+
   }
 
 

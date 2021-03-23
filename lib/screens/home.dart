@@ -83,15 +83,6 @@ class _homeState extends State<home> {
         backgroundColor: Colors.red,
         elevation: 0.0,
         actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              //TODO add a search function for the user to search for an user
-            },
-            icon: Icon(
-              Icons.search,
-              color: Colors.white,
-            ),
-          ),
         ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
