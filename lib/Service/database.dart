@@ -82,11 +82,12 @@ class DataBaseService {
     });
   }
   //leaving here until there is a need fo r it
-  Future setMessageData(String sentBy, String text, String time,
+  Future setMessageData(String sentBy, String text, DateTime time,
       List<String> read, String groupID) async {
-    return await messageCollection.doc(groupID).set({
+    return await messageCollection.doc().set({
       'sentBy': sentBy,
       'text': text,
+      'time' : time,
       'read': [" "],
       'groupID': groupID,
     });

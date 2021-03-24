@@ -10,8 +10,10 @@ import 'home.dart';
 class chatScreen extends StatefulWidget {
 
   String user;
+  String group;
+  String guid;
 
-  chatScreen({this.user});
+  chatScreen({this.user, this.group, this.guid});
 
   @override
   _chatScreenState createState() => _chatScreenState();
@@ -24,7 +26,7 @@ class _chatScreenState extends State<chatScreen> {
       appBar: AppBar(
         backgroundColor: Colors.red,
         title: Text(
-            widget.user
+            widget.group
         ),
       ),
       body: Column(

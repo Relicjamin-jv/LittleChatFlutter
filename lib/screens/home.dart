@@ -106,7 +106,7 @@ class _homeState extends State<home> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) =>
-                                            chatScreen(user: displayToChat)))
+                                            chatScreen(group: displayToChat, guid: user.data()['groups'][index], user: widget.user)))
                                 },
                               title: FutureBuilder(
                                 future: _title(user.data()['groups'][index]),
