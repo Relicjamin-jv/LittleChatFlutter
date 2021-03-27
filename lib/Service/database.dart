@@ -21,7 +21,7 @@ class DataBaseService {
   final CollectionReference groupCollection = FirebaseFirestore.instance
       .collection("group");
   final CollectionReference messageCollection = FirebaseFirestore.instance
-      .collection("message");
+      .collection("messages");
   final CollectionReference scheduleCollection = FirebaseFirestore.instance.
       collection("schedule");
 
@@ -83,13 +83,13 @@ class DataBaseService {
   }
   //leaving here until there is a need fo r it
   Future setMessageData(String sentBy, String text, DateTime time,
-      List<String> read, String groupID) async {
+      List<String> read, String guid) async {
     return await messageCollection.doc().set({
       'sentBy': sentBy,
       'text': text,
       'time' : time,
-      'read': [" "],
-      'groupID': groupID,
+      'read': [],
+      'groupUid': guid,
     });
   }
 
@@ -142,7 +142,7 @@ class DataBaseService {
     dynamic displayName;
     print(uuid);
     try {
-      await groupCollection.doc(uuid).get().then((
+      await userCollection.doc(uuid).get().then((
           DocumentSnapshot documentSnapshot) =>
       {
         displayName = documentSnapshot.data(),
@@ -183,6 +183,7 @@ class DataBaseService {
   Stream<DocumentSnapshot> get userData {
     return userCollection.doc(uid).snapshots();
   }
+
 
 
 

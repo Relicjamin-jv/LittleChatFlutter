@@ -1,8 +1,13 @@
 
 import 'dart:core';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:little_chat/Service/database.dart';
+import 'package:little_chat/Shared/loading.dart';
 import 'package:little_chat/models/message_model.dart';
 import 'home.dart';
 
@@ -20,6 +25,8 @@ class chatScreen extends StatefulWidget {
 }
 
 class _chatScreenState extends State<chatScreen> {
+  Message message;
+  ScrollController _scrollController = new ScrollController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,19 +39,37 @@ class _chatScreenState extends State<chatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: Container(
-              // child: ListView.builder(
-              //   reverse: true,
-              //   padding: EdgeInsets.only(top: 15.0),
-              //   itemCount: chats.length,
-              //     itemBuilder: (BuildContext context, int index) {
-              //     bool isMe = chats[index].senderid == widget.user;
-              //     final Message message = chats[index];
-              //     return _buildMessage(message, isMe);
-              // }),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('messages').where('groupUid', isEqualTo: widget.guid).orderBy('time', descending: true).snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text("Error");
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Loading();
+                }
+                if (snapshot.hasData) {
+                  return Container(
+                    child: ListView.builder(
+                        reverse: true,
+                        controller: _scrollController,
+                        shrinkWrap: true,
+                        padding: EdgeInsets.only(top: 15.0),
+                        itemCount: snapshot.data.docs.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          print(snapshot.data.docs[index]['text']);
+                          Message message = new Message(senderid: snapshot.data.docs[index]['sentBy'], time: snapshot.data.docs[index]['time'], text: snapshot.data.docs[index]['text'], read: snapshot.data.docs[index]['read']);
+                          bool isMe = message.senderid == widget.user ?? null;
+                          return _buildMessage(message, isMe);
+                        }),
+                  );
+                }else{
+                  return Text("");
+                }
+              }
             ),
           ),
-          _buildMessageComposer(),
+          _buildMessageComposer(widget.user, widget.guid),
         ],
       ),
     );
@@ -64,19 +89,34 @@ class _chatScreenState extends State<chatScreen> {
         children: [
           Row(
             children: [
-              Text(
-                message.time,
-                style: TextStyle(
-                  color: Colors.blueGrey,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w600,
-                ),
+              FutureBuilder(
+                future: _whoSent(message.senderid),
+                builder: (context, snap) {
+                  if(snap.hasError){
+                    return Text("Error");
+                  }
+                  if(snap.connectionState == ConnectionState.waiting){
+                    return Text("");
+                  }
+                  if(snap.hasData){
+                    return Text(
+                      snap.data['displayName'],
+                      style: TextStyle(
+                        color: Colors.blueGrey,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    );
+                  }else{
+                    return Loading();
+                  }
+                }
               ),
               Align(
                 alignment: Alignment.center,
                 child: Container(
                   child: Visibility(
-                    visible: message.unread,
+                    visible: message.read.length > 1,
                     child: Icon(
                       Icons.check,
                       size: 15.0,
@@ -98,9 +138,23 @@ class _chatScreenState extends State<chatScreen> {
       ),
     );
   }
+
+  Future _whoSent(String senderid) async {
+    try {
+      dynamic result = await DataBaseService().getDisplayName(senderid);
+      if (result == null){
+        return Text("Failed");
+      }else{
+        return result;
+      }
+    }catch(e){
+      print(e.toString());
+    }
+  }
 }
 
-_buildMessageComposer() {
+_buildMessageComposer(String user, String guid) {
+  TextEditingController message = new TextEditingController();
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 8.0),
     height: 70.0,
@@ -117,6 +171,7 @@ _buildMessageComposer() {
             onPressed: () => null,
         ),
         Expanded(child: TextField(
+          controller: message,
           textCapitalization: TextCapitalization.sentences,
           onChanged: (value) {
           },
@@ -130,8 +185,10 @@ _buildMessageComposer() {
           ),
           iconSize: 25.0,
           color: Colors.red[600],
-          //TODO sending a message to the mothership
-          onPressed: () => null,
+          onPressed: () => {
+            DataBaseService().setMessageData(user, message.text, DateTime.now(), [], guid),
+            message.text = "",
+          },
         ),
       ],
     ),

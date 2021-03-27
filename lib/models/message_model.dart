@@ -1,17 +1,19 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class Message{
   final String senderid;
-  final String time;
+  final Timestamp time;
   final String text;
-  final bool unread;
+  final List read;
 
   Message({
     this.senderid,
     this.time,
     this.text,
-    this.unread
+    this.read
   });
 
 }

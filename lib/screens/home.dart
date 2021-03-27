@@ -100,7 +100,6 @@ class _homeState extends State<home> {
                           itemBuilder: (BuildContext context, int index) {
                             return ListTile(
                               onTap: () => {
-                                print(displayName),
                                 displayToChat = displayName[index],
                                 Navigator.push(
                                     context,
