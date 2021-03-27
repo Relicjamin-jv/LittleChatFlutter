@@ -38,17 +38,6 @@ class _user_selectionState extends State<user_selection> {
         ),
         backgroundColor: Colors.red,
         elevation: 0.0,
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              //TODO add a search function for the user to search for an user
-            },
-            icon: Icon(
-              Icons.search,
-              color: Colors.white,
-            ),
-          ),
-        ],
       ),
       body: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("users").snapshots(),
@@ -122,6 +111,7 @@ class _user_selectionState extends State<user_selection> {
                 DataBaseService().updateGroupData(
                     uuidgroup, memberNames, userUid, wantedUser,
                     type); //setting up the group data for all the users, making a new document collection
+                DataBaseService().setMessageData("aVcSnAr2XLdWvVmw617WSpaEYN13", "Welcome! Contact me if you find any bugs. -Automatic message", DateTime.now(), [], uuidgroup);
                 for (var i = 0; i < wantedUser.length; i++) {
                   DataBaseService()
                       .updateUserGroups([uuidgroup], wantedUser[i]) //add each user to the group in the users collection

@@ -1,3 +1,5 @@
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'package:little_chat/screens/ChatScreen.dart';
 import 'package:little_chat/screens/shed.dart';
 import 'package:little_chat/screens/user_selection.dart';
 import 'package:provider/provider.dart';
+import 'package:little_chat/screens/Info.dart';
 
 class home extends StatefulWidget {
   final String user;
@@ -57,8 +60,7 @@ class _homeState extends State<home> {
             ListTile(
               leading: Icon(Icons.info_outline_rounded),
               title: Text("Information"),
-              //TODO make a screen that has a short info on the app and contact information
-              onTap: () => null,
+              onTap: () =>  Navigator.push(context, MaterialPageRoute(builder: (_) => info())),
             ),
             ListTile(
               leading: Icon(Icons.exit_to_app_sharp),
@@ -92,7 +94,6 @@ class _homeState extends State<home> {
             if (snapshot.hasData) {
               return Column(
                 children: [
-                  //TODO add the listview based on this video https://www.youtube.com/watch?v=h-igXZCCrrc
                   Expanded(
                     child: Container(
                       child: ListView.builder(
@@ -157,8 +158,25 @@ class _homeState extends State<home> {
                                   }
                                 },
                               ),
-                              subtitle: Text(
-                                  "Placement holder until logic is set in place"),
+                              subtitle: StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance.collection("messages").where("groupUid", isEqualTo: user.data()['groups'][index]).orderBy('time', descending: true).limit(1).snapshots(),
+                                builder: (context, snapshot) {
+                                  return StreamBuilder<DocumentSnapshot>(
+                                    stream: FirebaseFirestore.instance.collection("users").doc(snapshot.data.docs[0].data()['sentBy']).snapshots(),
+                                    builder: (context, displaySnap) {
+                                      if(snapshot.data.docs[0].data() != null) {
+                                        return Text(
+                                          displaySnap.data
+                                              .data()['displayName'] + ": " +
+                                              snapshot.data.docs[0].data()['text'],
+                                          overflow: TextOverflow.ellipsis,
+                                        );
+                                      } else {
+                                        return Text("");
+                                      }
+                                    });
+                                }
+                              ),
                             );
                           }),
                     ),
@@ -184,4 +202,6 @@ class _homeState extends State<home> {
       return result;
     }
   }
+
+
 }
