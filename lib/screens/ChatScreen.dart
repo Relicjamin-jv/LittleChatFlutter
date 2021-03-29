@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:little_chat/Service/database.dart';
 import 'package:little_chat/Shared/loading.dart';
+import 'package:little_chat/Shared/smallLoading.dart';
 import 'package:little_chat/models/message_model.dart';
 import 'home.dart';
+import 'package:intl/intl.dart';
 
 
 class chatScreen extends StatefulWidget {
@@ -17,8 +19,9 @@ class chatScreen extends StatefulWidget {
   String user;
   String group;
   String guid;
+  String displayName;
 
-  chatScreen({this.user, this.group, this.guid});
+  chatScreen({this.user, this.group, this.guid, this.displayName});
 
   @override
   _chatScreenState createState() => _chatScreenState();
@@ -49,6 +52,7 @@ class _chatScreenState extends State<chatScreen> {
                   return Loading();
                 }
                 if (snapshot.hasData) {
+                  DataBaseService().updateReadMessage(widget.displayName, widget.guid);
                   return Container(
                     child: ListView.builder(
                         reverse: true,
@@ -100,7 +104,7 @@ class _chatScreenState extends State<chatScreen> {
                   }
                   if(snap.hasData){
                     return Text(
-                      snap.data['displayName'],
+                      snap.data['displayName'] + " ",
                       style: TextStyle(
                         color: Colors.blueGrey,
                         fontSize: 14.0,
@@ -108,19 +112,23 @@ class _chatScreenState extends State<chatScreen> {
                       ),
                     );
                   }else{
-                    return Loading();
+                    return smallLoading();
                   }
                 }
               ),
               Align(
-                alignment: Alignment.center,
-                child: Container(
-                  child: Visibility(
-                    visible: message.read.length > 1,
-                    child: Icon(
-                      Icons.check,
-                      size: 15.0,
-                    ),
+                alignment: Alignment.centerRight,
+                child: Text(
+                  _formatTime(message.time),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Visibility(
+                  visible: isMe ? message.read.length >= 2 : message.read.length == -1,
+                  child: Icon(
+                    Icons.check,
+                    size: 15.0,
                   ),
                 ),
               ),
@@ -150,6 +158,18 @@ class _chatScreenState extends State<chatScreen> {
     }catch(e){
       print(e.toString());
     }
+  }
+
+  String _formatTime(Timestamp time) {
+    String formattedTime = '';
+
+    String formattedTimeDay = DateFormat.E().format(time.toDate());
+    String formattedTimeNDay = DateFormat.d().format(time.toDate());
+    String formattedTimeJM = DateFormat.jm().format(time.toDate());
+
+    formattedTime = formattedTimeDay + " " + formattedTimeNDay + ", " + formattedTimeJM;
+
+    return formattedTime;
   }
 }
 

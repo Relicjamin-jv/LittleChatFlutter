@@ -1,3 +1,5 @@
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -62,6 +64,22 @@ class DataBaseService {
     return await userCollection.doc(uid).update({
       'groups' : FieldValue.arrayUnion(guid),
     });
+  }
+
+  Future updateReadMessage(String currUser, String guid) async {
+    List userRead = [];
+    userRead.add(currUser);
+    try{
+      await messageCollection.where('groupUid', isEqualTo: guid).get().then((QuerySnapshot querySnapshot) => {
+        querySnapshot.docs.forEach((element) {
+          messageCollection.doc(element.id).update({
+            'read' : FieldValue.arrayUnion(userRead),
+          });
+        })
+      });
+    }catch(e){
+
+    }
   }
 
   //couldnt get it to work but it heres so if I deciede if I want to figure it out later I will

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:little_chat/Service/auth.dart';
 import 'package:little_chat/Service/database.dart';
 import 'package:little_chat/Shared/loading.dart';
+import 'package:little_chat/Shared/smallLoading.dart';
 import 'package:little_chat/models/message_model.dart';
 import 'package:little_chat/models/userInfo.dart';
 import 'package:little_chat/models/userdatamodel.dart';
@@ -102,11 +103,12 @@ class _homeState extends State<home> {
                             return ListTile(
                               onTap: () => {
                                 displayToChat = displayName[index],
+                                DataBaseService().updateReadMessage(user.data()['displayName'], user.data()['groups'][index]),
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (_) =>
-                                            chatScreen(group: displayToChat, guid: user.data()['groups'][index], user: widget.user)))
+                                            chatScreen(group: displayToChat, guid: user.data()['groups'][index], user: widget.user, displayName: user.data()['displayName'])))
                                 },
                               title: FutureBuilder(
                                 future: _title(user.data()['groups'][index]),
@@ -130,7 +132,7 @@ class _homeState extends State<home> {
                                   }else if(snap.hasError){
                                     return Text("There was an error");
                                   }else{
-                                    return Loading();
+                                    return smallLoading();
                                   }
                                 },
                               ),
@@ -154,7 +156,7 @@ class _homeState extends State<home> {
                                   }else if(snap.hasError){
                                     return Text("There was an error");
                                   }else{
-                                    return Loading();
+                                    return smallLoading();
                                   }
                                 },
                               ),
@@ -164,15 +166,17 @@ class _homeState extends State<home> {
                                   return StreamBuilder<DocumentSnapshot>(
                                     stream: FirebaseFirestore.instance.collection("users").doc(snapshot.data.docs[0].data()['sentBy']).snapshots(),
                                     builder: (context, displaySnap) {
-                                      if(snapshot.data.docs[0].data() != null) {
+                                      if(displaySnap.hasData && snapshot.hasData) {
                                         return Text(
                                           displaySnap.data
                                               .data()['displayName'] + ": " +
                                               snapshot.data.docs[0].data()['text'],
                                           overflow: TextOverflow.ellipsis,
                                         );
-                                      } else {
-                                        return Text("");
+                                      } else if(displaySnap.connectionState == ConnectionState.waiting){
+                                        return smallLoading();
+                                      }else{
+                                        return Text("Error");
                                       }
                                     });
                                 }
