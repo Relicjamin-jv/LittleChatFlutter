@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -141,9 +142,16 @@ class _chatScreenState extends State<chatScreen> {
                       iconSize: 25.0,
                       color: Colors.red[600],
                       onPressed: () => {
-                        DataBaseService().setMessageData(
-                            widget.user, messageText.text, DateTime.now(), [], widget.guid),
-                        messageText.text = "",
+                        if(messageText.text.isNotEmpty){
+                          DataBaseService().setMessageData(
+                              widget.user, messageText.text, DateTime.now(), [], widget.guid),
+                          messageText.text = "",
+                        },
+                        if(_image != null){
+                          setState((){
+                            _image = null;
+                          }),
+                        }
                       },
                     ),
                   ],
