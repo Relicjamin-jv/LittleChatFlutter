@@ -57,31 +57,6 @@ class _uploaderState extends State<uploader> {
     }
   }
 
-  // Future<void> handleUploadTask() async{
-  //   String file = 'uploadSchedule/${DateTime.now()}.png';
-  //   task = storage.ref().child(file).putFile(widget.file);
-  //   task.snapshotEvents.listen((TaskSnapshot snapshot) {
-  //     print("Task state: ${snapshot.state}");
-  //     print("Progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100} %");
-  //     setState(() {
-  //       progressState = (snapshot.bytesTransferred / snapshot.totalBytes);
-  //     });
-  //   }, onError: (e){
-  //     print(task.snapshot);
-  //     if(e.code == 'permission-denied'){
-  //       print("user does not have permission");
-  //     }
-  //   });
-  //
-  //   try{
-  //     await task;
-  //   }on FirebaseException catch (e) {
-  //     if ((e.code) == "permission-denied") {
-  //       print("user does not have permission");
-  //     }
-  //   }
-  // }
-
   void _startUpload(){
     uploadTime = DateTime.now();
     String filepath = 'scheduleImages/$uploadTime.png';
@@ -94,7 +69,7 @@ class _uploaderState extends State<uploader> {
   }
 
   Future downloadUrL() async{
-    for(var i =0; i < 4; i++) {
+    for(var i = 0; i < 4; i++) {
       downloadUrl =
       await storage.ref(finalPath).getDownloadURL().whenComplete(() =>
       {

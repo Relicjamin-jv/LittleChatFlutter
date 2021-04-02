@@ -111,7 +111,7 @@ class _user_selectionState extends State<user_selection> {
                 DataBaseService().updateGroupData(
                     uuidgroup, memberNames, userUid, wantedUser,
                     type); //setting up the group data for all the users, making a new document collection
-                DataBaseService().setMessageData("hVmDXtVSX2Z80zcZgoXCboNndtf2", "Welcome! Contact me if you find any bugs. -Automatic message", DateTime.now(), [], uuidgroup);
+                DataBaseService().setMessageData("hVmDXtVSX2Z80zcZgoXCboNndtf2", "Welcome! Contact me if you find any bugs. -Automatic message", DateTime.now(), [], uuidgroup, 0, "");
                 for (var i = 0; i < wantedUser.length; i++) {
                   DataBaseService()
                       .updateUserGroups([uuidgroup], wantedUser[i]) //add each user to the group in the users collection

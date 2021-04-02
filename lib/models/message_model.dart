@@ -8,12 +8,16 @@ class Message{
   final Timestamp time;
   final String text;
   final List read;
+  final int type;
+  final String photoUrl;
 
   Message({
     this.senderid,
     this.time,
     this.text,
-    this.read
+    this.read,
+    this.type,
+    this.photoUrl
   });
 
 }

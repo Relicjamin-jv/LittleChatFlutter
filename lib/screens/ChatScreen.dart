@@ -29,14 +29,17 @@ class chatScreen extends StatefulWidget {
 }
 
 class _chatScreenState extends State<chatScreen> {
+  final FirebaseStorage storage = FirebaseStorage.instanceFor(bucket: "gs://littlechat-76a32.appspot.com");
   Message message;
   ScrollController _scrollController = new ScrollController();
   TextEditingController messageText = new TextEditingController();
   File _image;
+  String finalPath = '';
+  UploadTask task;
+  String downloadUrl = "";
 
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
@@ -74,7 +77,10 @@ class _chatScreenState extends State<chatScreen> {
                                 senderid: snapshot.data.docs[index]['sentBy'],
                                 time: snapshot.data.docs[index]['time'],
                                 text: snapshot.data.docs[index]['text'],
-                                read: snapshot.data.docs[index]['read']);
+                                read: snapshot.data.docs[index]['read'],
+                                type: snapshot.data.docs[index]['type'],
+                                photoUrl: snapshot.data.docs[index]['photoUrl'],
+                            );
                             bool isMe = message.senderid == widget.user ?? null;
                             return _buildMessage(message, isMe);
                           }),
@@ -100,6 +106,32 @@ class _chatScreenState extends State<chatScreen> {
             ],
           ) : Text(""),
 
+          task == null ? Text("") :
+              StreamBuilder(
+                stream: task.snapshotEvents,
+                builder: (context, snapshot){
+                  if(snapshot.hasData){
+                    double progressPercent = snapshot.data.bytesTransferred / snapshot.data.totalBytes;
+                   if(snapshot.connectionState == ConnectionState.active){
+                     task.whenComplete(() => {
+                      setState(() {
+                        task = null;
+                      })
+                     });
+                   }
+                    return Column(
+                      children: [
+                        if(snapshot.data.state.toString() == "TaskState.success")
+                        LinearProgressIndicator(value: progressPercent,),
+                      ],
+                    );
+                  }else if(snapshot.hasError){
+                    return Text("Error");
+                  }else{
+                    return Text("");
+                  }
+                }
+              ),
 
           SizedBox(
             height: 4,
@@ -142,12 +174,13 @@ class _chatScreenState extends State<chatScreen> {
                       iconSize: 25.0,
                       color: Colors.red[600],
                       onPressed: () => {
-                        if(messageText.text.isNotEmpty){
+                        if(messageText.text.isNotEmpty && _image == null){
                           DataBaseService().setMessageData(
-                              widget.user, messageText.text, DateTime.now(), [], widget.guid),
+                              widget.user, messageText.text, DateTime.now(), [], widget.guid, 0, ""),
                           messageText.text = "",
                         },
                         if(_image != null){
+                          _uploadImageMessage(_image),
                           setState((){
                             _image = null;
                           }),
@@ -184,6 +217,7 @@ class _chatScreenState extends State<chatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               FutureBuilder(
                   future: _whoSent(message.senderid),
@@ -228,12 +262,25 @@ class _chatScreenState extends State<chatScreen> {
             ],
           ),
           SizedBox(height: 8.0),
-          Text(
-            message.text,
-            style: TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.w600,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.network(
+                message.photoUrl,
+                height: message.type == 1 ? 300 : 0,
+                loadingBuilder:(context, child, progress){
+                  return progress == null ? child : LinearProgressIndicator(value: (progress.cumulativeBytesLoaded/progress.expectedTotalBytes));
+                },
+              ),
+              SizedBox(height: 4.0),
+              Text(
+                message.text,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           )
         ],
       ),
@@ -265,58 +312,27 @@ class _chatScreenState extends State<chatScreen> {
 
     return formattedTime;
   }
+
+  Future<void> _uploadImageMessage(File image) {
+    DateTime uploadTime = DateTime.now();
+    String downloadUrl = "Nothing";
+    String filePath = 'messagerImages/$uploadTime.png';
+    finalPath = filePath;
+    Reference ref = storage.ref().child(filePath);
+    setState(() {
+      task = ref.putFile(image);
+    });
+    task.then((res) => {
+      res.ref.getDownloadURL().then((value) => {
+        setState((){
+          downloadUrl = value;
+        }),
+      DataBaseService().setMessageData(
+      widget.user, messageText.text, DateTime.now(), [], widget.guid, 1, downloadUrl),
+          messageText.text = "",
+      }),
+    });
+    print(downloadUrl);
+  }
 }
 
-_buildMessageComposer(String user, String guid) {
-  TextEditingController message = new TextEditingController();
-  File _image;
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 8.0),
-    height: 70.0,
-    color: Colors.white,
-    child: Column(
-      children: [
-        Container(
-          child: _image == null ? Text("") : Image.file(_image),
-        ),
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.photo,
-              ),
-              iconSize: 25.0,
-              color: Colors.red[600],
-              onPressed: () => {
-                imageService().getImage().then((value) => {
-                      _image = value,
-                    }),
-              },
-            ),
-            Expanded(
-                child: TextField(
-              controller: message,
-              textCapitalization: TextCapitalization.sentences,
-              onChanged: (value) {},
-              decoration: InputDecoration.collapsed(
-                hintText: "Send a message",
-              ),
-            )),
-            IconButton(
-              icon: Icon(
-                Icons.send,
-              ),
-              iconSize: 25.0,
-              color: Colors.red[600],
-              onPressed: () => {
-                DataBaseService().setMessageData(
-                    user, message.text, DateTime.now(), [], guid),
-                message.text = "",
-              },
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}

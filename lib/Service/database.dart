@@ -101,13 +101,15 @@ class DataBaseService {
   }
   //leaving here until there is a need fo r it
   Future setMessageData(String sentBy, String text, DateTime time,
-      List<String> read, String guid) async {
+      List<String> read, String guid, int type, String photoUrl) async {
     return await messageCollection.doc().set({
       'sentBy': sentBy,
       'text': text,
       'time' : time,
       'read': [],
       'groupUid': guid,
+      'photoUrl' : photoUrl,
+      'type' : type
     });
   }
 
