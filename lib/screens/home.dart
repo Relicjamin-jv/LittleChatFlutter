@@ -167,11 +167,14 @@ class _homeState extends State<home> {
                                     stream: FirebaseFirestore.instance.collection("users").doc(snapshot.data.docs[0].data()['sentBy']).snapshots(),
                                     builder: (context, displaySnap) {
                                       if(displaySnap.hasData && snapshot.hasData) {
-                                        return Text(
+                                        return snapshot.data.docs[0].data()['type'] == 0 ? Text(
                                           displaySnap.data
                                               .data()['displayName'] + ": " +
                                               snapshot.data.docs[0].data()['text'],
                                           overflow: TextOverflow.ellipsis,
+                                        ) : Text(
+                                            displaySnap.data
+                                                .data()['displayName'] + ": " + "Image...."
                                         );
                                       } else if(displaySnap.connectionState == ConnectionState.waiting){
                                         return smallLoading();
