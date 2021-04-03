@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:little_chat/models/userInfo.dart';
 import 'package:little_chat/screens/home.dart';
 
@@ -9,6 +10,7 @@ import 'database.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String token = '';
 
   /*creates a firebase instance, allows to interact with Firebase Auth*/
 
@@ -45,14 +47,23 @@ class AuthService {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: userName, password: passWord);
       List<String> displayName = _toDisplayName(userName);
-      await DataBaseService(uid: userCredential.user.uid).updateUserData(
-          capitalize(displayName[0]) + " " + capitalize(displayName[1]),
-          ["Everybody"]);
+      await getToken().whenComplete(() => {
+        DataBaseService(uid: userCredential.user.uid).updateUserData(
+        capitalize(displayName[0]) + " " + capitalize(displayName[1]),
+        ["Everybody"], token)
+      });
       return _userFromFirebaseCredential(userCredential);
     } on FirebaseAuthException catch (e) {
       print(e.code);
       return null;
     }
+  }
+
+  Future getToken() async {
+    await FirebaseMessaging.instance.getToken().then((value) => {
+      token = value,
+      print(token)
+    });
   }
 
   //sign out

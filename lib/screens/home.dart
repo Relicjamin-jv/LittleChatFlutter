@@ -15,6 +15,7 @@ import 'package:little_chat/screens/shed.dart';
 import 'package:little_chat/screens/user_selection.dart';
 import 'package:provider/provider.dart';
 import 'package:little_chat/screens/Info.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class home extends StatefulWidget {
   final String user;
@@ -28,6 +29,13 @@ class home extends StatefulWidget {
 class _homeState extends State<home> {
   List<String> displayName = [];
   String displayToChat = '';
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermissionForIos();
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<userInfo>(context);
@@ -208,6 +216,14 @@ class _homeState extends State<home> {
     }else{
       return result;
     }
+  }
+
+  Future<void> requestPermissionForIos() async {
+    FirebaseMessaging message = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await message.requestPermission(alert: true, sound: true); //request permission from ios user for notification settings to go through.
+
+    print('user granted permisson: ${settings.authorizationStatus}');
   }
 
 

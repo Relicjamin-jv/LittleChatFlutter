@@ -27,13 +27,14 @@ class DataBaseService {
   final CollectionReference scheduleCollection = FirebaseFirestore.instance.
       collection("schedule");
 
-  Future updateUserData(String displayName, List<String> groups) async {
+  Future updateUserData(String displayName, List<String> groups, String deviceID) async {
     await _collectionExist();
     if (userAlreadyExist == false) {
       return await userCollection.doc(uid).set({
         'uid': uid,
         'displayName': displayName,
         'groups' : groups,
+        'deviceId' : deviceID
       })
           .then((value) => print("user added to the documents")
       ).catchError((onError) => print("Failed to add user: $onError"));
@@ -101,7 +102,7 @@ class DataBaseService {
   }
   //leaving here until there is a need fo r it
   Future setMessageData(String sentBy, String text, DateTime time,
-      List<String> read, String guid, int type, String photoUrl) async {
+      List<String> read, String guid, int type, String photoUrl, String displayName) async {
     return await messageCollection.doc().set({
       'sentBy': sentBy,
       'text': text,
@@ -109,7 +110,8 @@ class DataBaseService {
       'read': [],
       'groupUid': guid,
       'photoUrl' : photoUrl,
-      'type' : type
+      'type' : type,
+      'displayName' : displayName
     });
   }
 

@@ -176,7 +176,7 @@ class _chatScreenState extends State<chatScreen> {
                       onPressed: () => {
                         if(messageText.text.isNotEmpty && _image == null){
                           DataBaseService().setMessageData(
-                              widget.user, messageText.text, DateTime.now(), [], widget.guid, 0, ""),
+                              widget.user, messageText.text, DateTime.now(), [], widget.guid, 0, "", widget.displayName,),
                           messageText.text = "",
                         },
                         if(_image != null){
@@ -328,7 +328,7 @@ class _chatScreenState extends State<chatScreen> {
           downloadUrl = value;
         }),
       DataBaseService().setMessageData(
-      widget.user, messageText.text, DateTime.now(), [], widget.guid, 1, downloadUrl),
+      widget.user, messageText.text, DateTime.now(), [], widget.guid, 1, downloadUrl, widget.displayName,),
           messageText.text = "",
       }),
     });
