@@ -10,30 +10,43 @@ exports.notifyNewMessage = functions.firestore
     .document("messages/{messageID}")
     .onCreate(async (snapshot, context) => {
       const message = snapshot.data();
-      functions.logger.log(message.text);
+
+      let finalMessage = message.text;
+
+      if (finalMessage.length > 10) {
+        finalMessage = finalMessage.substring(0, 9) + "...";
+      }
+
+      if (message.photoUrl != "") {
+        finalMessage = "Image...";
+      }
 
       const payload = {
         notification: {
           title: message.groupUid,
-          body: message.displayName + ": " + message.text,
+          body: message.displayName + ": " + finalMessage,
         },
       };
       let groupID = "Before";
 
       const docID = context.params.messageID;
 
-      await db.collection("messages").doc(docID).get()
+      await db
+          .collection("messages")
+          .doc(docID)
+          .get()
           .then((value) => {
             groupID = value.data()["groupUid"];
           });
 
-      await db.collection("users").where("groups", "in", [groupID])
-          .get().then((value) => {
+      await db
+          .collection("users")
+          .where("groups", "array-contains", groupID)
+          .get()
+          .then((value) => {
             value.docs.forEach((doc) => {
               fcm.sendToDevice(doc.data()["deviceId"], payload);
-              functions.logger.log(doc.data()["deviceId"]);
             });
           });
-
       return;
     });
