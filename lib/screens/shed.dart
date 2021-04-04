@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:little_chat/Service/database.dart';
 import 'package:little_chat/Shared/loading.dart';
-import 'package:little_chat/models/shed_model.dart';
 import 'package:little_chat/screens/uploadScreen.dart';
 import 'package:photo_view/photo_view.dart';
 import 'dart:io';

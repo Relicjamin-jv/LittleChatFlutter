@@ -22,7 +22,7 @@ class chatScreen extends StatefulWidget {
   String guid;
   String displayName;
 
-  chatScreen({this.user, this.group, this.guid, this.displayName});
+  chatScreen({this.user, this.group, this.guid, this.displayName, });
 
   @override
   _chatScreenState createState() => _chatScreenState();

@@ -29,6 +29,7 @@ class home extends StatefulWidget {
 class _homeState extends State<home> {
   List<String> displayName = [];
   String displayToChat = '';
+  List finalDisplayName = [];
 
   @override
   void initState() {
@@ -225,6 +226,7 @@ class _homeState extends State<home> {
 
     print('user granted permisson: ${settings.authorizationStatus}');
   }
+
 
 
 }

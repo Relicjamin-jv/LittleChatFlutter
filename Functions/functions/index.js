@@ -13,6 +13,8 @@ exports.notifyNewMessage = functions.firestore
 
       let finalMessage = message.text;
 
+      let finalDisplayName = "";
+
       if (finalMessage.length > 10) {
         finalMessage = finalMessage.substring(0, 9) + "...";
       }
@@ -21,10 +23,14 @@ exports.notifyNewMessage = functions.firestore
         finalMessage = "Image...";
       }
 
+      await db.collection("users").doc(message.sentBy).get().then((value) => {
+        finalDisplayName = value.data()["displayName"];
+      });
+
       const payload = {
         notification: {
-          title: message.groupUid,
-          body: message.displayName + ": " + finalMessage,
+          title: message.displayName,
+          body: finalDisplayName + ": " + finalMessage,
         },
       };
       let groupID = "Before";

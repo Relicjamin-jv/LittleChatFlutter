@@ -176,6 +176,21 @@ class DataBaseService {
 
   }
 
+  static Future<bool> checkExist(String docID) async {
+    bool exists = false;
+    try {
+      await FirebaseFirestore.instance.doc("messages/$docID").get().then((doc) {
+        if (doc.exists)
+          exists = true;
+        else
+          exists = false;
+      });
+      return exists;
+    } catch (e) {
+      return false;
+    }
+  }
+
 
   Future<bool> _collectionExist() async {
     return await FirebaseFirestore.instance
